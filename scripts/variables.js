@@ -1,4 +1,4 @@
-const layers = [52, 26, 13, 2]; // Layers format
+const layers = [5, 5, 2]; // Layers format
 var isTraining = false;
 
 // number of blocks
@@ -48,7 +48,9 @@ const mutability = 20;
 const genTime = 15;
 var bestEver = 0;
 
-const speed = 5;
+const moveSpeed = 5;
+const rotationSpeed = 0.1;
+
 var speedAmplifier = 1;
 
 var bestHTML = document.getElementById("best");
@@ -105,11 +107,11 @@ const totalProbability = (100 - 98.92);
 var rollGen = 6;
 
 var NNxSpacing = 40;
-var NNySpacing = 1;
-var NNradius = 1;
-var NNaxonSize = 1;
+var NNySpacing = 5;
+var NNradius = 13;
+var NNaxonSize = 3;
 var NNxOffset = 25;
-var NNyOffset = 10;
+var NNyOffset = 25;
 
 function spawnFood(l) {
     for (let mx = 0; mx < maxPellets; mx++) {

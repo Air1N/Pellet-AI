@@ -99,28 +99,43 @@ function Update(l) {
 
     for (let ffa = 0; ffa < board[l].creatures.length; ffa++) {
         let obj = board[l].creatures[ffa];
-        //let nearestFood = getNearestPellets(obj, l)[0];
+        let nearestFood = getNearestPellets(obj, l)[0];
         let input = []; // input is the x position, the y position, and time
         
         input.push(obj.x / 1920);
         input.push(obj.y / 1080);
-
-
+        
+        input.push(obj.rotation / (2 * Math.PI));
+        
+        input.push(nearestFood.x / 1920);
+        input.push(nearestFood.y / 1080);
+        
+        
+        /*
         for (let mp = 0; mp < board[l].foods.length; mp++) {
             input.push(board[l].foods[mp].x / 1920);
             input.push(board[l].foods[mp].y / 1080);
         }
 
-        /*for (let ml = 0; ml < board[l].creatures.length; ml++) {
+        for (let ml = 0; ml < board[l].creatures.length; ml++) {
             input.push(board[l].creatures[ml].x / 1920);
             input.push(board[l].creatures[ml].y / 1080);
         }*/
 
         let output = obj.feedForward(input); // take input, return output
 
-        obj.x += output[0] * speed; // move based on output
-        obj.y += output[1] * speed; // move based on output
-
+        obj.velocity = output[0] * moveSpeed; // move based on output
+        obj.rotation += output[1] * rotationSpeed; // move based on output
+        
+        if (obj.rotation > 0) {
+            obj.rotation = obj.rotation % (2 * Math.PI);
+        } else {
+            obj.rotation = (2 * Math.PI) - (obj.rotation % (2 * Math.PI));
+        }
+        
+        obj.x += obj.velocity * Math.cos(obj.rotation);
+        obj.y += obj.velocity * Math.sin(obj.rotation);
+        
         for (let xzx = 0; xzx < board[l].foods.length; xzx++) {
             if (board[l].creatures[ffa].overlap(board[l].foods[xzx])) {
                 board[l].creatures[ffa].fitness += pelletValue;
@@ -147,6 +162,16 @@ function Render() {
         ctx.lineWidth = 5;
         ctx.beginPath();
         ctx.arc(obj.x + creatureSize, obj.y + creatureSize, creatureSize, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.strokeStyle = "white";
+        ctx.fillStyle = "black";
+        ctx.beginPath();
+        ctx.arc(obj.x + creatureSize, obj.y + creatureSize, creatureSize, obj.rotation - 0.5, obj.rotation + 0.5);
+        ctx.arc(obj.x + creatureSize, obj.y + creatureSize, creatureSize + 15, obj.rotation, obj.rotation);
+        ctx.closePath();
         ctx.fill();
         ctx.stroke();
     }
@@ -228,7 +253,7 @@ function Render() {
             ctxN.fill();
 
             ctxN.fillStyle = "#fff";
-            ctxN.fillText(crea.network.neurons[mm][vv].toFixed(1), mm * (NNxSpacing + NNradius * 2) + NNxOffset, vv * (NNySpacing + NNradius * 2) + NNyOffset);
+            ctxN.fillText(crea.network.neurons[mm][vv].toFixed(1), mm * (NNxSpacing + NNradius * 2) + NNxOffset - NNradius / 1.5, vv * (NNySpacing + NNradius * 2) + NNyOffset + 3);
         }
     }
 

@@ -11,7 +11,10 @@ function Creature(c) {
     this.pr = Math.floor(Math.random() * 256);
     this.pg = Math.floor(Math.random() * 256);
     this.pb = Math.floor(Math.random() * 256);
-
+    
+    this.rotation = 0;
+    this.velocity = 0;
+    
     this.lastDistanceToNearest = 0;
     this.network.mutability = [];
     this.color = c;
