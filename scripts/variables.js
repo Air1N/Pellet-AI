@@ -1,4 +1,4 @@
-const layers = [4, 2]; // Layers format
+const layers = [52, 26, 13, 2]; // Layers format
 var isTraining = false;
 
 // number of blocks
@@ -55,10 +55,25 @@ var bestHTML = document.getElementById("best");
 var avgHTML = document.getElementById("avg");
 var worstHTML = document.getElementById("worst");
 
-var bestPoints = [{x: 0, y: 1080}];
-var avgPoints = [{x: 0, y: 1080}];
-var worstPoints = [{x: 0, y: 1080}];
-var bestAveragePoints = [{x: 0, y: 1080}, {x: 0, y: 1080}];
+var bestPoints = [{
+    x: 0,
+    y: 1080
+}];
+var avgPoints = [{
+    x: 0,
+    y: 1080
+}];
+var worstPoints = [{
+    x: 0,
+    y: 1080
+}];
+var bestAveragePoints = [{
+    x: 0,
+    y: 1080
+}, {
+    x: 0,
+    y: 1080
+}];
 var speedTimes = 0;
 
 var streamMode = true;
@@ -87,3 +102,10 @@ const topCreatures = population * boards / 2;
 const totalProbability = (100 - 98.92);
 
 var rollGen = 6;
+
+var NNxSpacing = 40;
+var NNySpacing = 1;
+var NNradius = 1;
+var NNaxonSize = 1;
+var NNxOffset = 25;
+var NNyOffset = 10;

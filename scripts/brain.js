@@ -13,7 +13,7 @@ function Creature(c) {
     this.pb = Math.floor(Math.random() * 256);
     this.lastOutput = [0, 0];
     this.lastInput = [];
-    
+
     this.lastDistanceToNearest = 0;
     this.network.mutability = [];
     this.color = c;
@@ -78,7 +78,7 @@ function Creature(c) {
                         var weight = this.network.axons[i][j][k];
                         var randomNumber = Math.random() * 100;
                         const numMutations = 5;
-                        
+
                         if (randomNumber < totalProbability * 1 / numMutations) {
                             weight *= Math.random();
                         } else if (randomNumber < totalProbability * 2 / numMutations) {
@@ -112,12 +112,9 @@ function Creature(c) {
         }
     };
 
-    this.overlap = function(obj) {
-        if (this.x > obj.x + obj.width || this.x + this.width < obj.x || this.y > obj.y + obj.height || this.y + this.height < obj.y) {
-            return false;
-        } else {
-            return true;
-        }
+    this.overlap = function(b) {
+        return (ue.abs(Math.round(this.x - b.x)) << 1 < (this.width + b.width)) &&
+            (ue.abs(Math.round(this.y - b.y)) << 1 < (this.height + b.height));
     };
 
     this.createNeuralNetwork();

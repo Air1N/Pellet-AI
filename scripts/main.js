@@ -8,12 +8,9 @@ function Object(x, y, w, h, c) {
     this.color = c;
 
     //this.type = t;
-    this.overlap = function(obj) {
-        if (this.x > obj.x + obj.width || this.x + this.width < obj.x || this.y > obj.y + obj.height || this.y + this.height < obj.y) {
-            return false;
-        } else {
-            return true;
-        }
+    this.overlap = function(b) {
+        return (ue.abs(Math.round(this.x - b.x)) << 1 < (this.width + b.width)) &&
+            (ue.abs(Math.round(this.y - b.y)) << 1 < (this.height + b.height));
     };
 }
 
@@ -40,23 +37,23 @@ function wallLock(l) {
 }
 
 function makeColor() {
-    let pr = Math.floor(Math.random() * 256);
-    let pg = Math.floor(Math.random() * 256);
-    let pb = Math.floor(Math.random() * 256);
+    let pr = Math.floor(Math.random() << 8);
+    let pg = Math.floor(Math.random() << 8);
+    let pb = Math.floor(Math.random() << 8);
     decide = Math.floor(Math.random() * 3);
     if (decide === 0) {
         pr = 255;
-        decide = Math.floor(Math.random() * 2);
+        decide = Math.floor(Math.random() << 1);
         if (decide === 0) pb = 0;
         if (decide === 1) pg = 0;
     } else if (decide === 1) {
         pg = 255;
-        decide = Math.floor(Math.random() * 2);
+        decide = Math.floor(Math.random() << 1);
         if (decide === 0) pr = 0;
         if (decide === 1) pb = 0;
     } else if (decide === 2) {
         pb = 255;
-        decide = Math.floor(Math.random() * 2);
+        decide = Math.floor(Math.random() << 1);
         if (decide === 0) pr = 0;
         if (decide === 1) pg = 0;
     }
@@ -122,13 +119,13 @@ function Update(l) {
                 board[g / population].creatures = temparray;
             }
 
-            for (let i = 0; i < allCreatures.length; i++) {
-                let obj = allCreatures[i];
+            for (let xx = 0; xx < allCreatures.length; xx++) {
+                let obj = allCreatures[xx];
                 avgFitness += obj.fitness / allCreatures.length;
 
 
-                if (i < bestCreature - topCreatures) {
-                    obj.copyNeuralNetwork(allCreatures[bestCreature - i % topCreatures]);
+                if (xx < bestCreature - topCreatures) {
+                    obj.copyNeuralNetwork(allCreatures[bestCreature - xx % topCreatures]);
                     obj.mutate();
                 }
 
@@ -142,18 +139,17 @@ function Update(l) {
         }
     }
 
-
     for (let i = 0; i < board[l].creatures.length; i++) {
         let obj = board[l].creatures[i];
         let nearestFood = getNearestPellets(obj, l)[0];
-        let input = [obj.x / 1920, obj.y / 1080, nearestFood.x / 1920, nearestFood.y / 1080]; // input is the x position, the y position, and time
+        let input = [obj.x / 1920, obj.y / 1080]; // input is the x position, the y position, and time
 
-        /*
         for (let mp = 0; mp < board[l].foods.length; mp++) {
             input.push(board[l].foods[mp].x / 1920);
             input.push(board[l].foods[mp].y / 1080);
         }
 
+        /*
         for (let ml = 0; ml < board[l].creatures.length; ml++) {
             input.push(board[l].creatures[ml].x / 1920);
             input.push(board[l].creatures[ml].y / 1080);
@@ -170,11 +166,11 @@ function Update(l) {
         obj.x += output[0] * speed; // move based on output
         obj.y += output[1] * speed; // move based on output
 
-        for (let j = board[l].foods.length - 1; j >= 0; j--) {
-            if (obj.overlap(board[l].foods[j])) {
-                obj.fitness += pelletValue;
 
-                board[l].foods.splice(j, 1);
+        for (let zz = board[l].foods.length - 1; zz >= 0; zz--) {
+            if (obj.overlap(board[l].foods[zz])) {
+                board[l].foods.splice(zz, 1);
+                obj.fitness += pelletValue;
             }
         }
     }
@@ -187,7 +183,7 @@ function spawnFood(l) {
         let y = Math.random() * (display.height - 200) + 100 - 10;
 
 
-        board[l].foods.push(new Object(x, y, pelletSize * 2, pelletSize * 2, "gold"));
+        board[l].foods.push(new Object(x, y, pelletSize << 1, pelletSize << 1, "gold"));
     }
 }
 
@@ -197,6 +193,7 @@ function Render() {
     ctx2.lineCap = "round";
     ctx2.lineJoin = "round";
     ctxN.clearRect(0, 0, neuralNetDisplay.width, neuralNetDisplay.height);
+    let crea = board[boards - 1].creatures[population - 1];
 
     for (let i = 0; i < board[boards - 1].creatures.length; i++) {
         let obj = board[boards - 1].creatures[i];
@@ -258,22 +255,6 @@ function Render() {
     }
     ctx2.stroke();
 
-    ctxN.strokeStyle = "#222";
-    ctxN.lineWidth = 3;
-    ctxN.font = "15px Georgia";
-    let crea = board[boards - 1].creatures[population - 1];
-    for (let i = 0; i < layers.length; i++) {
-        for (let j = 0; j < layers[i]; j++) {
-            ctxN.fillStyle = "#333";
-            ctxN.beginPath();
-            ctxN.arc(i * 115 + 30, j * 40 + 25, 15, 0, Math.PI * 2);
-            ctxN.stroke();
-            ctxN.fill();
-
-            ctxN.fillStyle = "#fff";
-            ctxN.fillText(crea.network.neurons[i][j].toFixed(1), i * 115 + 18, j * 40 + 30);
-        }
-    }
 
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 5;
@@ -282,15 +263,32 @@ function Render() {
     ctx.strokeText("B", crea.x + creatureSize / 2 + 3, crea.y + creatureSize + 14);
     ctx.fillText("B", crea.x + creatureSize / 2 + 3, crea.y + creatureSize + 14);
 
+    ctxN.lineWidth = NNaxonSize;
     for (let i = 0; i < crea.network.neurons.length - 1; i++) {
         for (let j = 0; j < crea.network.neurons[i].length; j++) {
             for (let k = 0; k < crea.network.neurons[i + 1].length; k++) {
                 ctxN.strokeStyle = getAxonColor(i, j, k, crea);
                 ctxN.beginPath();
-                ctxN.moveTo(i * 115 + 45, j * 40 + 25);
-                ctxN.lineTo((i + 1) * 115 + 15, k * 40 + 25);
+                ctxN.moveTo(i * (NNxSpacing + NNradius * 2) + NNxOffset, j * (NNySpacing + NNradius * 2) + NNyOffset);
+                ctxN.lineTo((i + 1) * (NNxSpacing + NNradius * 2) + NNxOffset, k * (NNySpacing + NNradius * 2) + NNyOffset);
                 ctxN.stroke();
             }
+        }
+    }
+
+    ctxN.strokeStyle = "#222";
+    ctxN.lineWidth = 3;
+    ctxN.font = "15px Georgia";
+    for (let i = 0; i < layers.length; i++) {
+        for (let j = 0; j < layers[i]; j++) {
+            ctxN.fillStyle = "#333";
+            ctxN.beginPath();
+            ctxN.arc(i * (NNxSpacing + NNradius * 2) + NNxOffset, j * (NNySpacing + NNradius * 2) + NNyOffset, NNradius, 0, Math.PI * 2);
+            ctxN.stroke();
+            ctxN.fill();
+
+            ctxN.fillStyle = "#fff";
+            ctxN.fillText(crea.network.neurons[i][j].toFixed(1), i * (NNxSpacing + NNradius * 2) + NNxOffset, j * (NNySpacing + NNradius * 2) + NNyOffset);
         }
     }
 
@@ -404,7 +402,7 @@ function graph() {
 }
 
 function getAxonColor(i, j, k, obj) {
-    let axValue = Math.round(obj.network.axons[i][k][j] * 126 + 126);
+    let axValue = Math.round(obj.network.axons[i][k][j] * 128 + 127);
 
     return "rgb(" + axValue + "," + axValue + "," + axValue + ")";
 }
