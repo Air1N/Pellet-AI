@@ -1,19 +1,3 @@
-function Object(x, y, w, h, c) {
-    this.ox = x;
-    this.oy = y;
-    this.x = x;
-    this.y = y;
-    this.width = w;
-    this.height = h;
-    this.color = c;
-
-    //this.type = t;
-    this.overlap = function(b) {
-        return (ue.abs(Math.round(this.x - b.x)) << 1 < (this.width + b.width)) &&
-            (ue.abs(Math.round(this.y - b.y)) << 1 < (this.height + b.height));
-    };
-}
-
 function wallLock(l) {
     for (let j = 0; j < population; j++) {
         let obj = board[l].creatures[j];
@@ -36,38 +20,19 @@ function wallLock(l) {
     }
 }
 
-function makeColor() {
-    let pr = Math.floor(Math.random() << 8);
-    let pg = Math.floor(Math.random() << 8);
-    let pb = Math.floor(Math.random() << 8);
-    decide = Math.floor(Math.random() * 3);
-    if (decide === 0) {
-        pr = 255;
-        decide = Math.floor(Math.random() << 1);
-        if (decide === 0) pb = 0;
-        if (decide === 1) pg = 0;
-    } else if (decide === 1) {
-        pg = 255;
-        decide = Math.floor(Math.random() << 1);
-        if (decide === 0) pr = 0;
-        if (decide === 1) pb = 0;
-    } else if (decide === 2) {
-        pb = 255;
-        decide = Math.floor(Math.random() << 1);
-        if (decide === 0) pr = 0;
-        if (decide === 1) pg = 0;
-    }
-
-    color = "rgba(" + pr + ", " + pg + ", " + pb + ", 1)";
-}
-
 function doUpdate() {
+    var startTime = new Date();
     for (let f = 0; f < speedAmplifier; f++) {
         for (let l = 0; l < boards; l++) {
             Update(l);
             wallLock(l);
         }
     }
+    var endTime = new Date();
+
+    Render();
+    
+    console.log(endTime - startTime);
 }
 
 function fitnessSort(a, b) {
@@ -78,23 +43,15 @@ function Update(l) {
     speedAmplifier = document.getElementById("speed").value;
     board[l].time++;
 
-
     if (board[l].time > genTime * 100) {
         board[l].isTraining = false;
         board[l].time = 0;
     }
 
-    spawnFood(l);
 
     if (!board[l].isTraining) {
         board[l].isTraining = true;
-
-
         generationNumber += 1 / boards;
-
-        if (generationNumber == 1 / boards) {
-            createBoxes();
-        }
 
         avgFitness = 0;
 
@@ -104,7 +61,6 @@ function Update(l) {
 
         if (allCreatures.length == population * boards) {
             board[l].foods = board[l].foods.slice(0, 1);
-            spawnFood(l);
 
             generationNumber = Math.round(generationNumber);
 
@@ -139,52 +95,40 @@ function Update(l) {
         }
     }
 
-    for (let i = 0; i < board[l].creatures.length; i++) {
-        let obj = board[l].creatures[i];
-        let nearestFood = getNearestPellets(obj, l)[0];
-        let input = [obj.x / 1920, obj.y / 1080]; // input is the x position, the y position, and time
+    spawnFood(l);
+
+    for (let ffa = 0; ffa < board[l].creatures.length; ffa++) {
+        let obj = board[l].creatures[ffa];
+        //let nearestFood = getNearestPellets(obj, l)[0];
+        let input = []; // input is the x position, the y position, and time
+        
+        input.push(obj.x / 1920);
+        input.push(obj.y / 1080);
+
 
         for (let mp = 0; mp < board[l].foods.length; mp++) {
             input.push(board[l].foods[mp].x / 1920);
             input.push(board[l].foods[mp].y / 1080);
         }
 
-        /*
-        for (let ml = 0; ml < board[l].creatures.length; ml++) {
+        /*for (let ml = 0; ml < board[l].creatures.length; ml++) {
             input.push(board[l].creatures[ml].x / 1920);
             input.push(board[l].creatures[ml].y / 1080);
-        }
-        */
-
-        obj.lastInput = input;
+        }*/
 
         let output = obj.feedForward(input); // take input, return output
-
-        obj.lastOutput = output;
-
 
         obj.x += output[0] * speed; // move based on output
         obj.y += output[1] * speed; // move based on output
 
-
-        for (let zz = board[l].foods.length - 1; zz >= 0; zz--) {
-            if (obj.overlap(board[l].foods[zz])) {
-                board[l].foods.splice(zz, 1);
-                obj.fitness += pelletValue;
+        for (let xzx = 0; xzx < board[l].foods.length; xzx++) {
+            if (board[l].creatures[ffa].overlap(board[l].foods[xzx])) {
+                board[l].creatures[ffa].fitness += pelletValue;
+                board[l].foods.splice(xzx, 1);
             }
         }
     }
-}
-
-function spawnFood(l) {
-    for (let mx = 0; mx < maxPellets; mx++) {
-        if (board[l].foods.length == maxPellets) break;
-        let x = Math.random() * (display.width - 200) + 100 - 10;
-        let y = Math.random() * (display.height - 200) + 100 - 10;
-
-
-        board[l].foods.push(new Object(x, y, pelletSize << 1, pelletSize << 1, "gold"));
-    }
+    
 }
 
 function Render() {
@@ -246,15 +190,10 @@ function Render() {
     }
     ctx2.stroke();
 
-    ctx2.lineWidth = 2;
-    ctx2.strokeStyle = "#555";
-    ctx2.beginPath();
-    ctx2.moveTo(worstPoints[0].x, worstPoints[0].y);
-    for (let i = 1; i < worstPoints.length; i++) {
-        ctx2.lineTo(worstPoints[i].x, worstPoints[i].y);
-    }
-    ctx2.stroke();
 
+    if (typeof crea == undefined) {
+        return;
+    }
 
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 5;
@@ -264,6 +203,7 @@ function Render() {
     ctx.fillText("B", crea.x + creatureSize / 2 + 3, crea.y + creatureSize + 14);
 
     ctxN.lineWidth = NNaxonSize;
+
     for (let i = 0; i < crea.network.neurons.length - 1; i++) {
         for (let j = 0; j < crea.network.neurons[i].length; j++) {
             for (let k = 0; k < crea.network.neurons[i + 1].length; k++) {
@@ -279,16 +219,16 @@ function Render() {
     ctxN.strokeStyle = "#222";
     ctxN.lineWidth = 3;
     ctxN.font = "15px Georgia";
-    for (let i = 0; i < layers.length; i++) {
-        for (let j = 0; j < layers[i]; j++) {
+    for (let mm = 0; mm < layers.length; mm++) {
+        for (let vv = 0; vv < layers[mm]; vv++) {
             ctxN.fillStyle = "#333";
             ctxN.beginPath();
-            ctxN.arc(i * (NNxSpacing + NNradius * 2) + NNxOffset, j * (NNySpacing + NNradius * 2) + NNyOffset, NNradius, 0, Math.PI * 2);
+            ctxN.arc(mm * (NNxSpacing + NNradius * 2) + NNxOffset, vv * (NNySpacing + NNradius * 2) + NNyOffset, NNradius, 0, Math.PI * 2);
             ctxN.stroke();
             ctxN.fill();
 
             ctxN.fillStyle = "#fff";
-            ctxN.fillText(crea.network.neurons[i][j].toFixed(1), i * (NNxSpacing + NNradius * 2) + NNxOffset, j * (NNySpacing + NNradius * 2) + NNyOffset);
+            ctxN.fillText(crea.network.neurons[mm][vv].toFixed(1), mm * (NNxSpacing + NNradius * 2) + NNxOffset, vv * (NNySpacing + NNradius * 2) + NNyOffset);
         }
     }
 
@@ -305,16 +245,6 @@ function Render() {
     ctxN.font = "24px Calibri";
     ctxN.strokeText("B", 254, 152);
     ctxN.fillText("B", 254, 152);
-}
-
-function createBoxes() {
-    creatures = [];
-    for (let i = 0; i < boards; i++) {
-        for (let j = 0; j < population; j++) {
-            makeColor();
-            board[i].creatures.push(new Creature(color));
-        }
-    }
 }
 
 let rollingCount = 0;
@@ -334,7 +264,6 @@ function logFitness() {
     bestHTML.innerHTML = bestFitness;
     document.getElementById("rbest").innerHTML = Math.round(bestFitCache);
     avgHTML.innerHTML = avgFitness;
-    worstHTML.innerHTML = worstFitness;
 
     if (bestFitness > bestEver) {
         bestEver = bestFitness;
@@ -376,16 +305,10 @@ function graph() {
         x: avgPoints.length * graphSegmentLength
     });
 
-    worstPoints.push({
-        y: display2.height - (display2.height / (maxScore / worstFitness)),
-        x: worstPoints.length * graphSegmentLength
-    });
-
     if (bestPoints[bestPoints.length - 1].x > display2.width) {
         for (let i = 0; i < bestPoints.length; i++) {
             bestPoints[i].x -= graphSegmentLength;
             avgPoints[i].x -= graphSegmentLength;
-            worstPoints[i].x -= graphSegmentLength;
         }
 
         for (let i = 0; i < bestAveragePoints.length; i++) {
@@ -394,7 +317,6 @@ function graph() {
 
         bestPoints.splice(0, 1);
         avgPoints.splice(0, 1);
-        worstPoints.splice(0, 1);
         if (rollingCount == 0) {
             bestAveragePoints.splice(0, 1);
         }
@@ -447,4 +369,3 @@ function updateSpeed(slow) {
 }
 
 setInterval(doUpdate, 1000 / 100);
-setInterval(Render, 1000 / 60);

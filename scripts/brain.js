@@ -2,8 +2,8 @@ function Creature(c) {
     this.fitness = 0;
     this.network = {};
     this.overlapping = 0;
-    this.x = display.width / 2;
-    this.y = display.height / 2;
+    this.x = 1920 / 2;
+    this.y = 1080 / 2;
     this.ox = this.x;
     this.oy = this.y;
     this.width = defw;
@@ -11,8 +11,6 @@ function Creature(c) {
     this.pr = Math.floor(Math.random() * 256);
     this.pg = Math.floor(Math.random() * 256);
     this.pb = Math.floor(Math.random() * 256);
-    this.lastOutput = [0, 0];
-    this.lastInput = [];
 
     this.lastDistanceToNearest = 0;
     this.network.mutability = [];
@@ -47,7 +45,7 @@ function Creature(c) {
             this.network.axons.push(layerWeights);
         }
     };
-
+    
 
     // This feeds the neuron values through the axons, and all the way to the end of the network.
     this.feedForward = function(inputs) {
@@ -61,8 +59,9 @@ function Creature(c) {
                 for (k = 0; k < this.network.neurons[i - 1].length; k++) {
                     value += this.network.axons[i - 1][j][k] * this.network.neurons[i - 1][k]; // Adds the neurons value * the weight
                 }
-
-                this.network.neurons[i][j] = Math.tanh(value); // Sets the neuron across from the axon to the new value (1 - -1)
+                
+                value = Math.clamp(value, -1, 1);
+                this.network.neurons[i][j] = 1.7159 * Math.tanh(2/3 * value); // Sets the neuron across from the axon to the new value (1 - -1)
             }
         }
         return this.network.neurons[this.network.neurons.length - 1]; // returns the output, or the last line
@@ -119,3 +118,5 @@ function Creature(c) {
 
     this.createNeuralNetwork();
 }
+
+createBoxes();
