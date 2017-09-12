@@ -8,6 +8,10 @@ ue.kill = function(obj) {
     killBuffer.push(obj);
 };
 
+ue.clamp = function(a, b, c) {
+    return Math.max(b, Math.min(a, c));
+};
+
 ue.text = function(t, x, y, s, b, c, vx, vy, f) {
     this.text = t;
     this.x = x;
@@ -24,7 +28,20 @@ ue.text = function(t, x, y, s, b, c, vx, vy, f) {
 };
 
 ue.abs = function(x) {
-  return (x ^ (x >> 31)) - (x >> 31);
+    return (x ^ (x >> 31)) - (x >> 31);
+};
+
+ue.tanh = function(x) {
+    if (x < -3)
+        return -1;
+    else if (x > 3)
+        return 1;
+    else
+        return x * (27 + x * x) / (27 + 9 * x * x);
+};
+
+ue.round = function(x) {
+    return ((((var1 / var2) + 0.5) << 1) >> 1) * var2;
 };
 
 ue.sprite = function(inp, x, y, w, h, img, animated, f, fps) {
@@ -61,10 +78,10 @@ ue.sprite = function(inp, x, y, w, h, img, animated, f, fps) {
 ue.object = function(x, y, w, h, n, img, he, at, animated, sw, sh, f, fps) {
     n = n || "object";
     this.name = n;
-    
+
     this.health = he;
     this.attack = at;
-    
+
     img = img || null;
     animated = animated || false;
     if (img !== null) {
@@ -77,7 +94,7 @@ ue.object = function(x, y, w, h, n, img, he, at, animated, sw, sh, f, fps) {
 
     this.body = {};
     this.hasMoved = false;
-    
+
     this.body.visible = true;
 
     this.body.hasGravity = true;
