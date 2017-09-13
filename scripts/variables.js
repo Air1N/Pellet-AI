@@ -23,6 +23,18 @@ const rollGen = 6;
 var streamMode = true;
 
 
+// END CONFIG //
+
+/*
+
+Everything past here is just
+random variables, I recommend
+NOT modifying anything, but you
+can if you want, of course at
+your own risk.
+
+*/
+
 // INITIAL VALUES //
 var isTraining = false;
 var objSort = {};
