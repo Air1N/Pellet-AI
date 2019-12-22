@@ -203,14 +203,14 @@ ue.object = function(x, y, w, h, n, img, he, at, animated, sw, sh, f, fps) {
 };
 
 
-ue.explosion = function(x, y, n, s, p, c, a, d, g) {
-    n = n || 20;
-    s = s || 20;
-    p = p || 5;
-    c = c || "#ffffff";
-    a = a || 0;
-    d = d / 2 || 360 / 2;
-    g = g || true;
+ue.explosion = function(xa, ya, na, sa, pa, ca, aa, da, ga) {
+    let n = na || 20;
+    let s = sa || 20;
+    let p = pa || 5;
+    let c = ca || "#ffffff";
+    let a = aa || 0;
+    let d = da / 2 || 360 / 2;
+    let g = ga || true;
 
 
     for (let i = 0; i < n; i++) {
