@@ -56,9 +56,9 @@ function Creature(c) {
         }
 
         for (let i = 1; i < this.network.layers.length; i++) {
-            for (j = 0; j < this.network.layers[i]; j++) {
+            for (let j = 0; j < this.network.layers[i]; j++) {
                 let value = offset;
-                for (k = 0; k < this.network.neurons[i - 1].length; k++) {
+                for (let k = 0; k < this.network.neurons[i - 1].length; k++) {
                     value += this.network.axons[i - 1][j][k] * this.network.neurons[i - 1][k]; // Adds the neurons value * the weight
                 }
                 
